@@ -1,0 +1,20 @@
+{
+  "name": "vtt-jquery-slider",
+  "version": "0.0.0",
+  "homepage": "",
+  "authors": [
+    "libeo <info@libeo.com>"
+  ],
+  "description": "A responsive/a11y friendly slider.",
+  "main": "dist/jquery.slider.js",
+  "private": true,
+  "ignore": [
+    "node_modules"
+  ],
+  "dependencies": {
+    "jquery": "^2.2.2",
+    "jquery-touchswipe": "~1.6.15",
+    "vtt-jquery-focusable": "https://github.com/libeo-vtt/jquery-focusable.git#~1.0.0"
+  },
+  "keywords": "slider, jquery, plugin"
+}
