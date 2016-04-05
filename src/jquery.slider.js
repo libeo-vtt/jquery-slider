@@ -42,7 +42,6 @@
             afterChangeSlide: $.noop,
             beforeUpdateLayout: $.noop,
             afterUpdateLayout: $.noop,
-            breakpoints: [],
             customGlobalClasses: []
         }, options || {});
 
@@ -70,9 +69,6 @@
         // Get displayed slides number
         this.displayedSlides = this.config.displayedSlides;
 
-        // Initialize current breakpoint
-        this.currentBreakpoint = undefined;
-
         // Initialize mouse hover state
         this.mouseHover = false;
 
@@ -82,18 +78,21 @@
         // Bind events
         this.bindEvents();
 
-        // Navigation initialization
-        if (this.config.createNavigation) {
-            this.createNavigation(this.config.navigationType);
-        }
+        if (this.slides.length > this.config.displayedSlides) {
+            // Navigation initialization
+            if (this.config.createNavigation) {
+                this.createNavigation(this.config.navigationType);
+            }
 
-        // Autoplay initialization
-        if (this.config.autoplay) {
-            this.autoplay();
-        }
+            // Autoplay initialization
+            if (this.config.autoplay) {
+                this.autoplay();
+            }
 
-        if (this.config.swipe) {
-            this.swipe();
+            // Swipe navigation initialization
+            if (this.config.swipe) {
+                this.swipe();
+            }
         }
 
         this.init();
@@ -105,7 +104,6 @@
         init: function() {
             // Layout initialization
             this.initLayout(this.config.displayedSlides);
-            this.onResize();
 
             this.createAriabox();
 
@@ -168,11 +166,6 @@
 
         // Bind events with actions
         bindEvents: function() {
-            // Function called each time the window is resized
-            $(window).on('resize', $.proxy(function() {
-                this.onResize();
-            }, this));
-
             this.slider.hover($.proxy(function() {
                 this.mouseHover = true;
             }, this), $.proxy(function() {
@@ -475,9 +468,15 @@
                 if (this.config.navigationType === 'dots' || this.config.navigationType === 'both') {
                     // Update dots buttons
                     this.navigationDots.removeClass(this.classes.active).eq(index).addClass(this.classes.active);
+                    // Get current active dot index
+                    var currentDotIndex = this.activeSlideIndex / this.displayedSlides;
+                    var currentDotIndexRounded = Math.floor(currentDotIndex);
+                    if (currentDotIndex === this.slides.length / this.displayedSlides - 1) {
+                        currentDotIndexRounded = this.navigationDots.length - 1;
+                    }
                     // Update hidden active text
                     this.navigationDots.find('.' + this.config.ariaTextActiveClass).remove();
-                    this.navigationDots.eq(index).append('<span class="visuallyhidden ' + this.config.ariaTextActiveClass + '">' + this.config.navigationDotActiveText + '</span>');
+                    this.navigationDots.eq(currentDotIndexRounded).append('<span class="visuallyhidden ' + this.config.ariaTextActiveClass + '">' + this.config.navigationDotActiveText + '</span>');
                 }
             }, this));
         },
@@ -487,25 +486,6 @@
             this.config.beforeClone();
             this.slider.find('.' + this.config.sliderActiveContentClass).html(content);
             this.config.afterClone();
-        },
-
-        // Function triggered each time the window is resized
-        onResize: function() {
-            var breakpoints = this.config.breakpoints,
-                currentBreakpoint;
-
-            // Loop through each breakpoints
-            for (var i = 0; i < breakpoints.length; i++) {
-                if (Modernizr.mq('only all and (max-width: ' + breakpoints[i].maxwidth + 'px)')) {
-                    currentBreakpoint = i;
-                    break;
-                } else {
-                    currentBreakpoint = undefined;
-                }
-            }
-
-            // Update breakpoint
-            this.updateBreakpoint(currentBreakpoint);
         },
 
         detectswipe: function(element, callback) {
@@ -518,7 +498,7 @@
             var max_x = 30
             var min_y = 50
             var max_y = 60
-            var direc = "";
+            var direction = '';
             element = element[0];
             element.addEventListener('touchstart', function(e) {
                 var t = e.touches[0];
@@ -548,30 +528,6 @@
                 swipe_det.eX = 0;
                 swipe_det.eY = 0;
             }, false);
-        },
-
-        // Update layout when a breakpoint is triggered
-        updateBreakpoint: function(breakpoint) {
-            var breakpoints = this.config.breakpoints;
-
-            // Check if breakpoint is not already active
-            if (this.currentBreakpoint !== breakpoint) {
-                // Check if existing breakpoint
-                if (breakpoint !== undefined) {
-                    this.displayedSlides = breakpoints[breakpoint].displayedSlides;
-                    this.createNavigation(breakpoints[breakpoint].navigationType);
-                    this.initLayout();
-                }
-                // Fallback to  config
-                else {
-                    this.displayedSlides = this.config.displayedSlides;
-                    this.createNavigation(this.config.navigationType);
-                    this.initLayout();
-                }
-
-                // Update current breakpoint
-                this.currentBreakpoint = breakpoint;
-            }
         },
 
         // Check if slider has active content attribute set to true
