@@ -42,7 +42,8 @@
             afterChangeSlide: $.noop,
             beforeUpdateLayout: $.noop,
             afterUpdateLayout: $.noop,
-            breakpoints: []
+            breakpoints: [],
+            customGlobalClasses: []
         }, options || {});
 
         this.classes = $.extend({
@@ -52,7 +53,7 @@
             clicked: 'is-clicked',
             extern: 'is-external',
             error: 'is-error'
-        }, this.config.customGlobalClasses || {});
+        }, (window.classes !== undefined ? window.classes : this.config.customGlobalClasses) || {});
 
         // Get the sliders wrapper
         this.sliderWrapper = this.slider.find('.' + this.config.sliderWrapperClass);
