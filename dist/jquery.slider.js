@@ -1,39 +1,21 @@
+// Slider jQuery Plugin
+// A responsive and a11y friendly jQuery slider.
+
 (function($) {
     var Slider = function(element, options) {
         this.slider = $(element);
 
-        this.config = $.extend({
+        // Default module configuration
+        this.defaults = {
             displayedSlides: 4,
             slidesMargin: 20,
             createNavigation: true,
             navigationType: 'both',
-            sliderOverflowClass: 'slider-overflow',
-            sliderWrapperClass: 'slider-wrapper',
-            sliderContainerClass: 'slider-container',
-            slideClass: 'slide',
-            sliderActiveContentClass: 'slider-activecontent',
-            sliderTriggerClass: 'slide-trigger',
-            sliderTriggerContentClass: 'slide-trigger-content',
-            sliderNavigationClass: 'slider-navigation',
-            navigationPrevClass: 'slider-navigation-prev',
-            navigationNextClass: 'slider-navigation-next',
-            navigationArrowClass: 'slider-navigation-arrows',
-            navigationDotClass: 'slider-navigation-dots',
-            navigationPrevText: 'Précédent',
-            navigationNextText: 'Suivant',
-            navigationDotText: 'Afficher la diapositive ',
-            navigationDotActiveText: 'Diapositive présentement affichée',
-            ariaTextClass: 'aria-text',
-            ariaTextActiveClass: 'aria-text-active',
-            ariaHiddenBoxClass: 'aria-hidden-box',
             displayDotsNumber: true,
             autoCenterActiveSlide: true,
             swipe: true,
             autoplay: false,
             autoplayDelay: 3000,
-            autoplayButtonClass: 'slider-autoplay',
-            autoplayButtonText: 'Mettre le carrousel en marche',
-            autoplayButtonPauseText: 'Mettre le carrousel en pause',
             changeSlideLoop: true,
             animationSpeed: 300,
             beforeClone: $.noop,
@@ -42,26 +24,54 @@
             afterChangeSlide: $.noop,
             beforeUpdateLayout: $.noop,
             afterUpdateLayout: $.noop,
-            customGlobalClasses: []
-        }, options || {});
+            labels: {
+                navigationPrev: 'Précédent',
+                navigationNext: 'Suivant',
+                navigationDot: 'Afficher la diapositive ',
+                navigationDotActive: 'Diapositive présentement affichée',
+                autoplayButton: 'Mettre le carrousel en marche',
+                autoplayButtonPause: 'Mettre le carrousel en pause'
+            },
+            classes: {
+                sliderOverflow: 'slider-overflow',
+                sliderWrapper: 'slider-wrapper',
+                sliderContainer: 'slider-container',
+                slide: 'slide',
+                sliderActiveContent: 'slider-activecontent',
+                sliderTrigger: 'slide-trigger',
+                sliderTriggerContent: 'slide-trigger-content',
+                sliderNavigation: 'slider-navigation',
+                navigationPrev: 'slider-navigation-prev',
+                navigationNext: 'slider-navigation-next',
+                navigationArrow: 'slider-navigation-arrows',
+                navigationDot: 'slider-navigation-dots',
+                ariaText: 'aria-text',
+                ariaTextActive: 'aria-text-active',
+                ariaHiddenBox: 'aria-hidden-box',
+                autoplayButton: 'slider-autoplay',
+                states: {
+                    active: 'is-active'
+                }
+            }
+        };
 
-        this.classes = $.extend({
-            active: 'is-active',
-            open: 'is-open',
-            hover: 'is-hover',
-            clicked: 'is-clicked',
-            extern: 'is-external',
-            error: 'is-error'
-        }, (window.classes !== undefined ? window.classes : this.config.customGlobalClasses) || {});
+        // Merge default classes with window.project.classes
+        this.classes = $.extend(true, this.defaults.classes, (window.project ? window.project.classes : {}));
+
+        // Merge default labels with window.project.labels
+        this.labels = $.extend(true, this.defaults.labels, (window.project ? window.project.labels : {}));
+
+        // Merge default config with custom config
+        this.config = $.extend(true, this.defaults, options || {});
 
         // Get the sliders wrapper
-        this.sliderWrapper = this.slider.find('.' + this.config.sliderWrapperClass);
+        this.sliderWrapper = this.slider.find('.' + this.classes.sliderWrapper);
 
         // Get the sliders container
-        this.sliderContainer = this.slider.find('.' + this.config.sliderContainerClass);
+        this.sliderContainer = this.slider.find('.' + this.classes.sliderContainer);
 
         // Get the slides
-        this.slides = this.slider.find('.' + this.config.slideClass);
+        this.slides = this.slider.find('.' + this.classes.slide);
 
         // Initialize activeSlideIndex
         this.activeSlideIndex = 0;
@@ -109,12 +119,12 @@
 
             // Create active content wrapper
             if (this.isActiveContent()) {
-                var content = this.slides.first().find('.' + this.config.sliderTriggerContentClass).clone();
-                this.slider.prepend('<div class="' + this.config.sliderActiveContentClass + '"></div>');
+                var content = this.slides.first().find('.' + this.classes.sliderTriggerContent).clone();
+                this.slider.prepend('<div class="' + this.classes.sliderContent + '"></div>');
                 this.updateActiveSlideContent(content);
                 // Auto center active slide
                 if (this.config.autoCenterActiveSlide === true) {
-                    this.slider.find('.' + this.config.sliderActiveContentClass).css('text-align', 'center');
+                    this.slider.find('.' + this.classes.sliderActiveContent).css('text-align', 'center');
                 }
             }
         },
@@ -140,8 +150,8 @@
             });
 
             // Create slider overflow wrapper
-            this.sliderWrapper.wrap('<div class="' + this.config.sliderOverflowClass + '"></div>');
-            this.slider.find('.' + this.config.sliderOverflowClass).css('overflow', 'hidden');
+            this.sliderWrapper.wrap('<div class="' + this.classes.sliderOverflow + '"></div>');
+            this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
             this.sliderContainer.css({
                 'position': 'relative',
@@ -174,8 +184,8 @@
 
             // Function called each time the sliderTrigger element is clicked
             if (this.isActiveContent()) {
-                this.slider.find('.' + this.config.sliderTriggerClass).on('click', $.proxy(function(e) {
-                    var content = $(e.currentTarget).parents('.' + this.config.slideClass).find('.' + this.config.sliderTriggerContentClass).clone();
+                this.slider.find('.' + this.classes.sliderTrigger).on('click', $.proxy(function(e) {
+                    var content = $(e.currentTarget).parents('.' + this.classes.slide).find('.' + this.classes.sliderTriggerContent).clone();
                     this.updateActiveSlideContent(content);
                     e.prevent();
                 }, this));
@@ -191,16 +201,16 @@
         // Create navigation
         createNavigation: function(type) {
             // Clear existing navigation
-            this.slider.find('.' + this.config.sliderNavigationClass).remove();
+            this.slider.find('.' + this.classes.sliderNavigation).remove();
 
             // Create navigation wrapper
-            this.sliderWrapper.after('<div class="' + this.config.sliderNavigationClass + ' clearfix"></div>');
+            this.sliderWrapper.after('<div class="' + this.classes.sliderNavigation + ' clearfix"></div>');
 
             // Get navigation wrapper obejct
-            this.sliderNavigation = this.slider.find('.' + this.config.sliderNavigationClass);
+            this.sliderNavigation = this.slider.find('.' + this.classes.sliderNavigation);
 
             // Add navigation type class
-            this.sliderNavigation.addClass('is-' + this.config.sliderNavigationClass + '-' + type);
+            this.sliderNavigation.addClass('is-' + this.classes.sliderNavigation + '-' + type);
 
             // Arrows navigation type
             if (type === 'arrows') {
@@ -219,18 +229,18 @@
 
         // Create arrows navigation
         createArrowsNavigation: function() {
-            var previousButton = '<button class="' + this.config.navigationPrevClass + '"><span class="visuallyhidden ' + this.config.ariaTextClass + '">' + this.config.navigationPrevText + '</span></button>',
-                nextButton = '<button class="' + this.config.navigationNextClass + '"><span class="visuallyhidden ' + this.config.ariaTextClass + '">' + this.config.navigationNextText + '</span></button>';
+            var previousButton = '<button class="' + this.classes.navigationPrev + '"><span class="visuallyhidden ' + this.labels.aria + '">' + this.labels.navigationPrev + '</span></button>',
+                nextButton = '<button class="' + this.classes.navigationNext + '"><span class="visuallyhidden ' + this.labels.aria + '">' + this.labels.navigationNext + '</span></button>';
 
             // Create navigation wrapper
-            this.sliderNavigation.append('<div class="' + this.config.navigationArrowClass + '-wrapper"></div>');
+            this.sliderNavigation.append('<div class="' + this.classes.navigationArrow + '-wrapper"></div>');
 
             // Append each arrows
-            this.sliderNavigation.find('.' + this.config.navigationArrowClass + '-wrapper').append(previousButton, nextButton);
+            this.sliderNavigation.find('.' + this.classes.navigationArrow + '-wrapper').append(previousButton, nextButton);
 
             // Get previous and next buttons
-            this.navigationPrevious = this.sliderNavigation.find('.' + this.config.navigationPrevClass);
-            this.navigationNext = this.sliderNavigation.find('.' + this.config.navigationNextClass);
+            this.navigationPrevious = this.sliderNavigation.find('.' + this.classes.navigationPrev);
+            this.navigationNext = this.sliderNavigation.find('.' + this.classes.navigationNext);
 
             if (this.config.navigationType === 'both') {
                 this.navigationPrevious.attr('aria-hidden', 'true');
@@ -246,8 +256,8 @@
             this.navigationPrevious.on('click', $.proxy(function(e) {
                 this.navigationTypeTriggered = 'arrows';
                 this.changeSlide(this.activeSlideIndex - 1);
-                this.navigationNext.removeClass(this.classes.active);
-                $(e.currentTarget).addClass(this.classes.active);
+                this.navigationNext.removeClass(this.classes.states.active);
+                $(e.currentTarget).addClass(this.classes.states.active);
 
                 // Update hidden aria box
                 this.updateAriabox('La diapositive précédente est affichée.');
@@ -260,8 +270,8 @@
             this.navigationNext.on('click', $.proxy(function(e) {
                 this.navigationTypeTriggered = 'arrows';
                 this.changeSlide(this.activeSlideIndex + 1);
-                this.navigationPrevious.removeClass(this.classes.active);
-                $(e.currentTarget).addClass(this.classes.active);
+                this.navigationPrevious.removeClass(this.classes.states.active);
+                $(e.currentTarget).addClass(this.classes.states.active);
 
                 // Update hidden aria box
                 this.updateAriabox('La diapositive suivante est affichée.');
@@ -273,33 +283,33 @@
 
         // Create dots navigation
         createDotsNavigation: function() {
-            var dot = '<button class="' + this.config.navigationDotClass + '"><span class="visuallyhidden ' + this.config.ariaTextClass + '"></span></button>';
+            var dot = '<button class="' + this.classes.navigationDot + '"><span class="visuallyhidden ' + this.labels.aria + '"></span></button>';
 
             // Create navigation wrapper
-            this.sliderNavigation.append('<div class="' + this.config.navigationDotClass + '-wrapper"></div>');
+            this.sliderNavigation.append('<div class="' + this.classes.navigationDot + '-wrapper"></div>');
 
             // Append each dots
             for (var i = 0; i < this.slides.length / this.displayedSlides; i++) {
-                this.sliderNavigation.find('.' + this.config.navigationDotClass + '-wrapper').append(dot);
+                this.sliderNavigation.find('.' + this.classes.navigationDot + '-wrapper').append(dot);
             }
 
             // Get dots elements
-            this.navigationDots = this.sliderNavigation.find('.' + this.config.navigationDotClass);
+            this.navigationDots = this.sliderNavigation.find('.' + this.classes.navigationDot);
 
             // Add aria text for each dot
             this.navigationDots.each($.proxy(function(index, el) {
                 // Show dots number
                 if (this.config.displayDotsNumber === true) {
-                    $(el).find('.' + this.config.ariaTextClass).text(this.config.navigationDotText).after(index + 1);
+                    $(el).find('.' + this.labels.aria).text(this.labels.navigationDot).after(index + 1);
                 }
                 // Don't show dots number
                 else {
-                    $(el).find('.' + this.config.ariaTextClass).text(this.config.navigationDotText + (parseInt(index) + 1));
+                    $(el).find('.' + this.labels.aria).text(this.labels.navigationDot + (parseInt(index) + 1));
                 }
             }, this));
 
             // Initialize first dot button
-            this.navigationDots.eq(0).addClass(this.classes.active).append('<span class="visuallyhidden ' + this.config.ariaTextActiveClass + '"> ' + this.config.navigationDotActiveText + '</span>');
+            this.navigationDots.eq(0).addClass(this.classes.states.active).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationDotActive + '</span>');
 
             this.bindEventsDotsNavigation();
         },
@@ -307,15 +317,15 @@
         // Bind events for the dots navigation
         bindEventsDotsNavigation: function() {
             // Get dots elements
-            this.navigationDots = this.sliderNavigation.find('.' + this.config.navigationDotClass);
+            this.navigationDots = this.sliderNavigation.find('.' + this.classes.navigationDot);
 
             // Bind click events
             this.navigationDots.on('click', $.proxy(function(e) {
                 this.navigationTypeTriggered = 'dots';
                 var index = $(e.currentTarget).index() - $(e.currentTarget).parent().find('.slider-navigation-prev, .slider-navigation-next').length;
                 this.changeSlide(index * this.displayedSlides);
-                this.navigationDots.removeClass(this.classes.active);
-                $(e.currentTarget).addClass(this.classes.active);
+                this.navigationDots.removeClass(this.classes.states.active);
+                $(e.currentTarget).addClass(this.classes.states.active);
 
                 // Stop autoplay
                 this.stopAutoplay();
@@ -353,10 +363,10 @@
 
         // Create autoplay button
         createAutoplayButton: function() {
-            var button = '<button class="' + this.config.autoplayButtonClass + ' ' + this.classes.active + '"><span class="">' + this.config.autoplayButtonText + '</span></button>';
+            var button = '<button class="' + this.classes.autoplayButton + ' ' + this.classes.states.active + '"><span class="">' + this.labels.autoplayButton + '</span></button>';
 
             // Create button
-            if (this.sliderNavigation.find('.' + this.config.autoplayButtonClass).length < 1) {
+            if (this.sliderNavigation.find('.' + this.classes.autoplayButton).length < 1) {
                 this.sliderNavigation.append(button);
                 this.bindEventsAutoplayButton();
             }
@@ -364,17 +374,17 @@
 
         bindEventsAutoplayButton: function() {
             // Get autoplay button
-            this.autoplayButton = this.sliderNavigation.find('.' + this.config.autoplayButtonClass);
+            this.autoplayButton = this.sliderNavigation.find('.' + this.classes.autoplayButton);
 
             // Bind click events
             this.autoplayButton.on('click', $.proxy(function() {
                 if (this.isAutoplay) {
                     this.stopAutoplay();
-                    this.autoplayButton.removeClass(this.classes.active);
+                    this.autoplayButton.removeClass(this.classes.states.active);
                 } else {
                     this.mouseHover = false;
                     this.autoplay();
-                    this.autoplayButton.addClass(this.classes.active);
+                    this.autoplayButton.addClass(this.classes.states.active);
                 }
             }, this));
         },
@@ -385,19 +395,19 @@
             clearInterval(this.autoplayInterval);
 
             // Remove active class on autoplay button
-            if (this.sliderNavigation.find('.' + this.config.autoplayButtonClass).length > 0) {
-                this.sliderNavigation.find('.' + this.config.autoplayButtonClass).removeClass(this.classes.active);
+            if (this.sliderNavigation.find('.' + this.classes.autoplayButton).length > 0) {
+                this.sliderNavigation.find('.' + this.classes.autoplayButton).removeClass(this.classes.states.active);
                 this.toggleAutoplayText();
             }
         },
 
         // Toggle aria text of autoplay button
         toggleAutoplayText: function() {
-            if (this.sliderNavigation.find('.' + this.config.autoplayButtonClass).length > 0) {
+            if (this.sliderNavigation.find('.' + this.classes.autoplayButton).length > 0) {
                 if (this.isAutoplay) {
-                    this.autoplayButton.find('span').text(this.config.autoplayButtonPauseText);
+                    this.autoplayButton.find('span').text(this.labels.autoplayButtonPause);
                 } else {
-                    this.autoplayButton.find('span').text(this.config.autoplayButtonText);
+                    this.autoplayButton.find('span').text(this.labels.autoplayButton);
                 }
             }
         },
@@ -405,8 +415,8 @@
         // Create aria hidden box
         createAriabox: function() {
             if (this.config.navigationType === 'arrows') {
-                this.slider.append('<div class="visuallyhidden ' + this.config.ariaHiddenBoxClass + '" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>');
-                this.ariaHiddenBox = this.slider.find('.' + this.config.ariaHiddenBoxClass);
+                this.slider.append('<div class="visuallyhidden ' + this.classes.ariaHiddenBox + '" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>');
+                this.ariaHiddenBox = this.slider.find('.' + this.classes.ariaHiddenBox);
             }
         },
 
@@ -467,7 +477,7 @@
                 this.slides.slice(index, index + this.displayedSlides).find(':focusable').removeAttr('tabindex');
                 if (this.config.navigationType === 'dots' || this.config.navigationType === 'both') {
                     // Update dots buttons
-                    this.navigationDots.removeClass(this.classes.active).eq(index).addClass(this.classes.active);
+                    this.navigationDots.removeClass(this.classes.states.active).eq(index).addClass(this.classes.states.active);
                     // Get current active dot index
                     var currentDotIndex = this.activeSlideIndex / this.displayedSlides;
                     var currentDotIndexRounded = Math.floor(currentDotIndex);
@@ -475,8 +485,8 @@
                         currentDotIndexRounded = this.navigationDots.length - 1;
                     }
                     // Update hidden active text
-                    this.navigationDots.find('.' + this.config.ariaTextActiveClass).remove();
-                    this.navigationDots.eq(currentDotIndexRounded).append('<span class="visuallyhidden ' + this.config.ariaTextActiveClass + '">' + this.config.navigationDotActiveText + '</span>');
+                    this.navigationDots.find('.' + this.classes.ariaTextActive).remove();
+                    this.navigationDots.eq(currentDotIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationDotActive + '</span>');
                 }
             }, this));
         },
@@ -484,7 +494,7 @@
         // Update active slide content
         updateActiveSlideContent: function(content) {
             this.config.beforeClone();
-            this.slider.find('.' + this.config.sliderActiveContentClass).html(content);
+            this.slider.find('.' + this.classes.sliderActiveContent).html(content);
             this.config.afterClone();
         },
 
