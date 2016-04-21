@@ -1,5 +1,5 @@
-# VTT jQuery Slider
-A responsive and a11y friendly jQuery slider.
+# jQuery Slider Plugin
+Accessible, responsive and configurable jQuery slider plugin
 
 ## Usage
 
@@ -18,7 +18,7 @@ A responsive and a11y friendly jQuery slider.
 3. Call the plugin:
 
 	```javascript
-	$("#element").slider({
+	$('#element').slider({
 		// config
 	});
 	```
