@@ -476,14 +476,14 @@
                 this.slides.find(':focusable').attr('tabindex', '-1');
                 this.slides.slice(index, index + this.displayedSlides).find(':focusable').removeAttr('tabindex');
                 if (this.config.navigationType === 'dots' || this.config.navigationType === 'both') {
-                    // Update dots buttons
-                    this.navigationDots.removeClass(this.classes.states.active).eq(index).addClass(this.classes.states.active);
                     // Get current active dot index
                     var currentDotIndex = this.activeSlideIndex / this.displayedSlides;
                     var currentDotIndexRounded = Math.floor(currentDotIndex);
                     if (currentDotIndex === this.slides.length / this.displayedSlides - 1) {
                         currentDotIndexRounded = this.navigationDots.length - 1;
                     }
+                    // Update dots buttons active class
+                    this.navigationDots.removeClass(this.classes.states.active).eq(currentDotIndexRounded).addClass(this.classes.states.active);
                     // Update hidden active text
                     this.navigationDots.find('.' + this.classes.ariaTextActive).remove();
                     this.navigationDots.eq(currentDotIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationDotActive + '</span>');
