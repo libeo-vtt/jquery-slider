@@ -8,43 +8,45 @@
         // Default module configuration
         this.defaults = {
             displayedSlides: 4,
-            slidesMargin: 20,
+            slidesGutter: 20,
             createNavigation: true,
             navigationType: 'both',
-            displayDotsNumber: true,
-            autoCenterActiveSlide: true,
+            createNavigationArrows: true,
+            createNavigationPages: true,
+            displayPageNumber: true,
+            displayFirstActiveContent: true,
             swipe: true,
             autoplay: false,
             autoplayDelay: 3000,
-            changeSlideLoop: true,
+            infiniteLoop: true,
             animationSpeed: 300,
-            beforeClone: $.noop,
-            afterClone: $.noop,
-            beforeChangeSlide: $.noop,
-            afterChangeSlide: $.noop,
-            beforeUpdateLayout: $.noop,
-            afterUpdateLayout: $.noop,
+            onActiveSlideUpdateBefore: $.noop,
+            onActiveSlideUpdateAfter: $.noop,
+            onChangeSlideBefore: $.noop,
+            onChangeSlideAfter: $.noop,
+            onLayoutUpdateBefore: $.noop,
+            onLayoutUpdateAfter: $.noop,
             labels: {
                 navigationPrev: 'Précédent',
+                navigationPrevAria: 'La diapositive précédente est affichée.',
                 navigationNext: 'Suivant',
-                navigationDot: 'Afficher la diapositive ',
-                navigationDotActive: 'Diapositive présentement affichée',
+                navigationNextAria: 'La diapositive suivante est affichée.',
+                navigationPage: 'Afficher la diapositive',
+                navigationPageActive: 'Diapositive présentement affichée',
                 autoplayButton: 'Mettre le carrousel en marche',
-                autoplayButtonPause: 'Mettre le carrousel en pause'
+                autoplayButtonPause: 'Mettre le carrousel en pause',
             },
             classes: {
                 sliderOverflow: 'slider-overflow',
                 sliderWrapper: 'slider-wrapper',
                 sliderContainer: 'slider-container',
                 slide: 'slide',
-                sliderActiveContent: 'slider-activecontent',
-                sliderTrigger: 'slide-trigger',
-                sliderTriggerContent: 'slide-trigger-content',
+                sliderActiveContentTrigger: 'slider-active-content-trigger',
                 sliderNavigation: 'slider-navigation',
                 navigationPrev: 'slider-navigation-prev',
                 navigationNext: 'slider-navigation-next',
                 navigationArrow: 'slider-navigation-arrows',
-                navigationDot: 'slider-navigation-dots',
+                navigationPage: 'slider-navigation-pages',
                 ariaText: 'aria-text',
                 ariaTextActive: 'aria-text-active',
                 ariaHiddenBox: 'aria-hidden-box',
@@ -64,45 +66,30 @@
         // Merge default config with custom config
         this.config = $.extend(true, this.defaults, options || {});
 
-        // Get the sliders wrapper
+        // Get sliders wrapper
         this.sliderWrapper = this.slider.find('.' + this.classes.sliderWrapper);
 
-        // Get the sliders container
+        // Get sliders container
         this.sliderContainer = this.slider.find('.' + this.classes.sliderContainer);
 
-        // Get the slides
+        // Get slides
         this.slides = this.slider.find('.' + this.classes.slide);
 
         // Initialize activeSlideIndex
         this.activeSlideIndex = 0;
 
-        // Get displayed slides number
-        this.displayedSlides = this.config.displayedSlides;
-
         // Initialize mouse hover state
         this.mouseHover = false;
 
         // Initialize animated state
-        this.animated = false;
-
-        // Bind events
-        this.bindEvents();
+        this.isAnimated = false;
 
         if (this.slides.length > this.config.displayedSlides) {
-            // Navigation initialization
-            if (this.config.createNavigation) {
-                this.createNavigation(this.config.navigationType);
+            if (this.config.createNavigationArrows || this.config.createNavigationPages) {
+                this.createNavigation();
             }
-
-            // Autoplay initialization
-            if (this.config.autoplay) {
-                this.autoplay();
-            }
-
-            // Swipe navigation initialization
-            if (this.config.swipe) {
-                this.swipe();
-            }
+            if (this.config.autoplay) this.autoplay();
+            if (this.config.swipe) this.swipe();
         }
 
         this.init();
@@ -112,66 +99,57 @@
 
         // Component initialization
         init: function() {
-            // Layout initialization
             this.initLayout(this.config.displayedSlides);
-
             this.createAriabox();
 
             // Create active content wrapper
             if (this.isActiveContent()) {
-                var content = this.slides.first().find('.' + this.classes.sliderTriggerContent).clone();
-                this.slider.prepend('<div class="' + this.classes.sliderContent + '"></div>');
-                this.updateActiveSlideContent(content);
-                // Auto center active slide
-                if (this.config.autoCenterActiveSlide === true) {
-                    this.slider.find('.' + this.classes.sliderActiveContent).css('text-align', 'center');
-                }
+                this.initActiveContent();
             }
+
+            // Bind events
+            this.bindEvents();
         },
 
         // Layout initialization
         initLayout: function() {
             var slideWidth = 100 / this.slides.length,
-                slideWidthCalc = this.config.slidesMargin / this.slides.length * this.slides.length,
-                slidesCSS = 'float: left;' +
-                'position: relative;' +
-                'width: ' + slideWidth + '%;' +
-                'width: calc(' + slideWidth + '% - ' + slideWidthCalc + 'px);';
+                slideWidthCalc = this.config.slidesGutter / this.slides.length * this.slides.length;
 
             // Callback
-            this.config.beforeUpdateLayout();
-
-            // Add necessary css for the slider
-            this.sliderWrapper.css({
-                'position': 'relative',
-                'overflow': 'hidden',
-                'margin-left': this.config.slidesMargin / 2 * -1 + 'px',
-                'margin-right': this.config.slidesMargin / 2 * -1 + 'px'
-            });
+            this.config.onLayoutUpdateBefore();
 
             // Create slider overflow wrapper
             this.sliderWrapper.wrap('<div class="' + this.classes.sliderOverflow + '"></div>');
             this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
+            // Add necessary css for the slider
+            this.sliderWrapper.css({
+                'position': 'relative',
+                'overflow': 'hidden',
+                'margin-left': this.config.slidesGutter / 2 * -1 + 'px',
+                'margin-right': this.config.slidesGutter / 2 * -1 + 'px'
+            });
+
             this.sliderContainer.css({
                 'position': 'relative',
                 'left': '0',
-                'width': this.slides.length / this.displayedSlides * 100 + '%'
+                'width': this.slides.length / this.config.displayedSlides * 100 + '%'
             });
 
-            this.slides.attr('style', slidesCSS).find('> a').css('display', 'block');
-
-            // Add margin to all slides
             this.slides.css({
-                'margin-left': this.config.slidesMargin / 2 + 'px',
-                'margin-right': this.config.slidesMargin / 2 + 'px'
+                'float': 'left',
+                'position': 'relative',
+                'margin-left': this.config.slidesGutter / 2 + 'px',
+                'margin-right': this.config.slidesGutter / 2 + 'px',
+                'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
             });
 
             // Disable focus on hidden slides
-            this.slides.slice(this.displayedSlides).find(':focusable').attr('tabindex', '-1');
+            this.slides.slice(this.config.displayedSlides).find(':focusable').attr('tabindex', '-1');
 
             // Callback
-            this.config.afterUpdateLayout();
+            this.config.onLayoutUpdateAfter();
         },
 
         // Bind events with actions
@@ -182,24 +160,39 @@
                 this.mouseHover = false;
             }, this));
 
-            // Function called each time the sliderTrigger element is clicked
-            if (this.isActiveContent()) {
-                this.slider.find('.' + this.classes.sliderTrigger).on('click', $.proxy(function(e) {
-                    var content = $(e.currentTarget).parents('.' + this.classes.slide).find('.' + this.classes.sliderTriggerContent).clone();
-                    this.updateActiveSlideContent(content);
-                    e.prevent();
-                }, this));
-            }
-
             // Detect keyboard navigation
             $(document).on('keyboardnavigation', $.proxy(function() {
-                // Stop autoplay
                 this.stopAutoplay();
             }, this));
         },
 
+        // Active Content initialization
+        initActiveContent: function() {
+            this.activeContentTriggers = this.slides.find('.' + this.classes.sliderActiveContentTrigger);
+            this.activeContentWrapper = $('.' + this.slider.data('active-content'));
+
+            this.activeContentTriggers.on('click', $.proxy(function(e) {
+                var $element = $(e.currentTarget);
+                var content = $element.parents('.' + this.classes.slide).find('.' + $element.data('show-active-content')).clone();
+
+                this.updateActiveSlideContent(content);
+                e.preventDefault();
+            }, this));
+
+            if (this.config.displayFirstActiveContent) {
+                this.activeContentTriggers.first().trigger('click');
+            }
+        },
+
+        // Update active slide content
+        updateActiveSlideContent: function(content) {
+            this.config.onActiveSlideUpdateBefore();
+            this.activeContentWrapper.html(content);
+            this.config.onActiveSlideUpdateAfter();
+        },
+
         // Create navigation
-        createNavigation: function(type) {
+        createNavigation: function() {
             // Clear existing navigation
             this.slider.find('.' + this.classes.sliderNavigation).remove();
 
@@ -209,33 +202,19 @@
             // Get navigation wrapper obejct
             this.sliderNavigation = this.slider.find('.' + this.classes.sliderNavigation);
 
-            // Add navigation type class
-            this.sliderNavigation.addClass('is-' + this.classes.sliderNavigation + '-' + type);
-
-            // Arrows navigation type
-            if (type === 'arrows') {
-                this.createArrowsNavigation();
-            }
-            // Dots navigation type
-            else if (type === 'dots') {
-                this.createDotsNavigation();
-            }
-            // Both navigation type
-            else {
-                this.createArrowsNavigation();
-                this.createDotsNavigation();
-            }
+            if (this.config.createNavigationArrows) this.createNavigationArrows();
+            if (this.config.createNavigationPages) this.createNavigationPages();
         },
 
         // Create arrows navigation
-        createArrowsNavigation: function() {
+        createNavigationArrows: function() {
             var previousButton = '<button class="' + this.classes.navigationPrev + '"><span class="visuallyhidden ' + this.labels.aria + '">' + this.labels.navigationPrev + '</span></button>',
                 nextButton = '<button class="' + this.classes.navigationNext + '"><span class="visuallyhidden ' + this.labels.aria + '">' + this.labels.navigationNext + '</span></button>';
 
             // Create navigation wrapper
             this.sliderNavigation.append('<div class="' + this.classes.navigationArrow + '-wrapper"></div>');
 
-            // Append each arrows
+            // Append each button
             this.sliderNavigation.find('.' + this.classes.navigationArrow + '-wrapper').append(previousButton, nextButton);
 
             // Get previous and next buttons
@@ -252,120 +231,107 @@
 
         // Bind events for the arrows navigation
         bindEventsArrowsNavigation: function() {
-            // Bind previous arrow event
             this.navigationPrevious.on('click', $.proxy(function(e) {
                 this.navigationTypeTriggered = 'arrows';
+
                 this.changeSlide(this.activeSlideIndex - 1);
-                this.navigationNext.removeClass(this.classes.states.active);
-                $(e.currentTarget).addClass(this.classes.states.active);
-
-                // Update hidden aria box
-                this.updateAriabox('La diapositive précédente est affichée.');
-
-                // Stop autoplay
+                this.updateAriabox(this.config.navigationPrevAria);
                 this.stopAutoplay();
             }, this));
 
-            // Bind next arrow event
             this.navigationNext.on('click', $.proxy(function(e) {
                 this.navigationTypeTriggered = 'arrows';
+
                 this.changeSlide(this.activeSlideIndex + 1);
-                this.navigationPrevious.removeClass(this.classes.states.active);
-                $(e.currentTarget).addClass(this.classes.states.active);
-
-                // Update hidden aria box
-                this.updateAriabox('La diapositive suivante est affichée.');
-
-                // Stop autoplay
+                this.updateAriabox(this.config.navigationNextAria);
                 this.stopAutoplay();
             }, this));
         },
 
-        // Create dots navigation
-        createDotsNavigation: function() {
-            var dot = '<button class="' + this.classes.navigationDot + '"><span class="visuallyhidden ' + this.labels.aria + '"></span></button>';
+        // Create pages navigation
+        createNavigationPages: function() {
+            var button = '<button class="' + this.classes.navigationPage + '"><span class="visuallyhidden ' + this.labels.aria + '"></span></button>';
 
             // Create navigation wrapper
-            this.sliderNavigation.append('<div class="' + this.classes.navigationDot + '-wrapper"></div>');
+            this.sliderNavigation.append('<div class="' + this.classes.navigationPage + '-wrapper"></div>');
 
-            // Append each dots
-            for (var i = 0; i < this.slides.length / this.displayedSlides; i++) {
-                this.sliderNavigation.find('.' + this.classes.navigationDot + '-wrapper').append(dot);
+            // Append each pages
+            for (var i = 0; i < this.slides.length / this.config.displayedSlides; i++) {
+                this.sliderNavigation.find('.' + this.classes.navigationPage + '-wrapper').append(button);
             }
 
-            // Get dots elements
-            this.navigationDots = this.sliderNavigation.find('.' + this.classes.navigationDot);
+            // Get pages elements
+            this.navigationPages = this.sliderNavigation.find('.' + this.classes.navigationPage);
 
-            // Add aria text for each dot
-            this.navigationDots.each($.proxy(function(index, el) {
-                // Show dots number
-                if (this.config.displayDotsNumber === true) {
-                    $(el).find('.' + this.labels.aria).text(this.labels.navigationDot).after(index + 1);
-                }
-                // Don't show dots number
-                else {
-                    $(el).find('.' + this.labels.aria).text(this.labels.navigationDot + (parseInt(index) + 1));
+            // Add aria text for each page
+            this.navigationPages.each($.proxy(function(index, element) {
+                if (this.config.displayPageNumber === true) {
+                    $(element).find('.' + this.labels.aria).text(this.labels.navigationPage).after(index + 1);
+                } else {
+                    $(element).find('.' + this.labels.aria).text(this.labels.navigationPage + (parseInt(index) + 1));
                 }
             }, this));
 
-            // Initialize first dot button
-            this.navigationDots.eq(0).addClass(this.classes.states.active).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationDotActive + '</span>');
+            // Initialize first page button
+            this.navigationPages.eq(0).addClass(this.classes.states.active).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationPageActive + '</span>');
 
-            this.bindEventsDotsNavigation();
+            this.bindEventsNavigationPages();
         },
 
-        // Bind events for the dots navigation
-        bindEventsDotsNavigation: function() {
-            // Get dots elements
-            this.navigationDots = this.sliderNavigation.find('.' + this.classes.navigationDot);
+        // Bind events for the pages navigation
+        bindEventsNavigationPages: function() {
+            // Get pages elements
+            this.navigationPages = this.sliderNavigation.find('.' + this.classes.navigationPage);
 
-            // Bind click events
-            this.navigationDots.on('click', $.proxy(function(e) {
-                this.navigationTypeTriggered = 'dots';
-                var index = $(e.currentTarget).index() - $(e.currentTarget).parent().find('.slider-navigation-prev, .slider-navigation-next').length;
-                this.changeSlide(index * this.displayedSlides);
-                this.navigationDots.removeClass(this.classes.states.active);
+            this.navigationPages.on('click', $.proxy(function(e) {
+                var index = $(e.currentTarget).index();
+
+                this.navigationTypeTriggered = 'pages';
+                this.navigationPages.removeClass(this.classes.states.active);
                 $(e.currentTarget).addClass(this.classes.states.active);
 
-                // Stop autoplay
+                this.changeSlide(index * this.config.displayedSlides);
+
                 this.stopAutoplay();
             }, this));
         },
 
         swipe: function() {
             this.detectswipe(this.slider, $.proxy(function(direction) {
-                // Stop autoplay
                 this.stopAutoplay();
-
-                if (direction === "left") {
-                    this.changeSlide(this.activeSlideIndex + 1);
-                } else {
-                    this.changeSlide(this.activeSlideIndex - 1);
-                }
-
+                this.changeSlide(this.activeSlideIndex + (direction === 'left' ? 1 : -1));
             }, this));
         },
 
         // Initialize autoplay
         autoplay: function() {
-            this.createAutoplayButton();
-
             this.isAutoplay = true;
+            this.autoplayButton.addClass(this.classes.states.active);
+
+            this.createAutoplayButton();
             this.toggleAutoplayText();
 
             this.autoplayInterval = setInterval($.proxy(function() {
-                if (!this.mouseHover) {
-                    this.changeSlide(this.activeSlideIndex + 1);
-                }
+                if (!this.mouseHover) this.changeSlide(this.activeSlideIndex + 1);
             }, this), this.config.autoplayDelay);
+        },
 
+        stopAutoplay: function() {
+            this.isAutoplay = false;
+
+            clearInterval(this.autoplayInterval);
+
+            // Remove active class on autoplay button
+            if (this.autoplayButton !== undefined) {
+                this.autoplayButton.removeClass(this.classes.states.active);
+                this.toggleAutoplayText();
+            }
         },
 
         // Create autoplay button
         createAutoplayButton: function() {
             var button = '<button class="' + this.classes.autoplayButton + ' ' + this.classes.states.active + '"><span class="">' + this.labels.autoplayButton + '</span></button>';
 
-            // Create button
             if (this.sliderNavigation.find('.' + this.classes.autoplayButton).length < 1) {
                 this.sliderNavigation.append(button);
                 this.bindEventsAutoplayButton();
@@ -373,32 +339,15 @@
         },
 
         bindEventsAutoplayButton: function() {
-            // Get autoplay button
             this.autoplayButton = this.sliderNavigation.find('.' + this.classes.autoplayButton);
-
-            // Bind click events
             this.autoplayButton.on('click', $.proxy(function() {
                 if (this.isAutoplay) {
                     this.stopAutoplay();
-                    this.autoplayButton.removeClass(this.classes.states.active);
                 } else {
                     this.mouseHover = false;
                     this.autoplay();
-                    this.autoplayButton.addClass(this.classes.states.active);
                 }
             }, this));
-        },
-
-        // Stop autoplay
-        stopAutoplay: function() {
-            this.isAutoplay = false;
-            clearInterval(this.autoplayInterval);
-
-            // Remove active class on autoplay button
-            if (this.sliderNavigation.find('.' + this.classes.autoplayButton).length > 0) {
-                this.sliderNavigation.find('.' + this.classes.autoplayButton).removeClass(this.classes.states.active);
-                this.toggleAutoplayText();
-            }
         },
 
         // Toggle aria text of autoplay button
@@ -414,7 +363,7 @@
 
         // Create aria hidden box
         createAriabox: function() {
-            if (this.config.navigationType === 'arrows') {
+            if (this.config.createNavigationArrows) {
                 this.slider.append('<div class="visuallyhidden ' + this.classes.ariaHiddenBox + '" aria-live="polite" aria-atomic="true" aria-hidden="true"></div>');
                 this.ariaHiddenBox = this.slider.find('.' + this.classes.ariaHiddenBox);
             }
@@ -422,7 +371,7 @@
 
         // Update aria hidden box
         updateAriabox: function(content) {
-            if (this.config.navigationType === 'arrows') {
+            if (this.config.createNavigationArrows) {
                 this.ariaHiddenBox.html(content);
             }
         },
@@ -431,96 +380,101 @@
         changeSlide: function(index) {
             // Prevent slide outside the wrapper
             if (index < 0) {
-                if (this.config.changeSlideLoop) {
-                    index = this.slides.length - this.displayedSlides;
+                if (this.config.infiniteLoop) {
+                    index = this.slides.length - this.config.displayedSlides;
                 } else {
                     index = 0;
                 }
-            } else if (index > this.slides.length - this.displayedSlides) {
-                if (this.navigationTypeTriggered === 'dots') {
-                    index = this.slides.length - this.displayedSlides;
+            } else if (index > this.slides.length - this.config.displayedSlides) {
+                if (this.navigationTypeTriggered === 'pages') {
+                    index = this.slides.length - this.config.displayedSlides;
                 } else {
-                    if (this.config.changeSlideLoop) {
+                    if (this.config.infiniteLoop) {
                         index = 0;
                     } else {
-                        index = this.slides.length - this.displayedSlides;
+                        index = this.slides.length - this.config.displayedSlides;
                     }
                 }
             }
 
             // Only animated if there is no active animation
-            if (!this.animated) {
+            if (!this.isAnimated) {
                 this.changeSlideAnimation(index);
             }
         },
 
         // Change active slide animation
         changeSlideAnimation: function(index) {
-            // Update animation state
-            this.animated = true;
+            this.isAnimated = true;
 
-            // Callback
-            this.config.beforeChangeSlide();
+            this.config.onChangeSlideBefore();
 
             // Change slide animation
             this.sliderContainer.animate({
-                left: 100 / this.displayedSlides * index * -1 + '%'
+                left: 100 / this.config.displayedSlides * index * -1 + '%'
             }, this.config.animationSpeed, $.proxy(function() {
-                // Update animation state
-                this.animated = false;
-                // Callback
-                this.config.afterChangeSlide();
+                this.isAnimated = false;
+
                 // Update active slide index
                 this.activeSlideIndex = index;
-                // Update tabindex
+
                 this.slides.find(':focusable').attr('tabindex', '-1');
-                this.slides.slice(index, index + this.displayedSlides).find(':focusable').removeAttr('tabindex');
-                if (this.config.navigationType === 'dots' || this.config.navigationType === 'both') {
-                    // Get current active dot index
-                    var currentDotIndex = this.activeSlideIndex / this.displayedSlides;
-                    var currentDotIndexRounded = Math.floor(currentDotIndex);
-                    if (currentDotIndex === this.slides.length / this.displayedSlides - 1) {
-                        currentDotIndexRounded = this.navigationDots.length - 1;
-                    }
-                    // Update dots buttons active class
-                    this.navigationDots.removeClass(this.classes.states.active).eq(currentDotIndexRounded).addClass(this.classes.states.active);
-                    // Update hidden active text
-                    this.navigationDots.find('.' + this.classes.ariaTextActive).remove();
-                    this.navigationDots.eq(currentDotIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationDotActive + '</span>');
+                this.slides.slice(index, index + this.config.displayedSlides).find(':focusable').removeAttr('tabindex');
+
+                if (this.config.createNavigationArrows || this.config.createNavigationPages) {
+                    this.updateSlidesNavigation();
                 }
+
+                this.config.onChangeSlideAfter();
             }, this));
         },
 
-        // Update active slide content
-        updateActiveSlideContent: function(content) {
-            this.config.beforeClone();
-            this.slider.find('.' + this.classes.sliderActiveContent).html(content);
-            this.config.afterClone();
+        // Update navigation active elements
+        updateSlidesNavigation: function() {
+            // Get current active page index
+            var currentPageIndex = this.activeSlideIndex / this.config.displayedSlides;
+            var currentPageIndexRounded = Math.floor(currentPageIndex);
+
+            if (currentPageIndex === this.slides.length / this.config.displayedSlides - 1) {
+                currentPageIndexRounded = this.navigationPages.length - 1;
+            }
+
+            // Update pages buttons active class
+            this.navigationPages.removeClass(this.classes.states.active).eq(currentPageIndexRounded).addClass(this.classes.states.active);
+
+            // Update hidden active text
+            this.navigationPages.find('.' + this.classes.ariaTextActive).remove();
+            this.navigationPages.eq(currentPageIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.navigationPageActive + '</span>');
         },
 
         detectswipe: function(element, callback) {
-            swipe_det = new Object();
-            swipe_det.sX = 0;
-            swipe_det.sY = 0;
-            swipe_det.eX = 0;
-            swipe_det.eY = 0;
             var min_x = 30
             var max_x = 30
             var min_y = 50
             var max_y = 60
             var direction = '';
+
+            swipe_det = new Object();
+            swipe_det.sX = 0;
+            swipe_det.sY = 0;
+            swipe_det.eX = 0;
+            swipe_det.eY = 0;
+
             element = element[0];
+
             element.addEventListener('touchstart', function(e) {
                 var t = e.touches[0];
                 swipe_det.sX = t.screenX;
                 swipe_det.sY = t.screenY;
             }, false);
+
             element.addEventListener('touchmove', function(e) {
-                e.preventDefault();
                 var t = e.touches[0];
                 swipe_det.eX = t.screenX;
                 swipe_det.eY = t.screenY;
+                e.preventDefault();
             }, false);
+
             element.addEventListener('touchend', function(e) {
                 if ((((swipe_det.eX - min_x > swipe_det.sX) || (swipe_det.eX + min_x < swipe_det.sX)) && ((swipe_det.eY < swipe_det.sY + max_y) && (swipe_det.sY > swipe_det.eY - max_y) && (swipe_det.eX > 0)))) {
                     if (swipe_det.eX > swipe_det.sX) direction = 'right';
@@ -542,7 +496,7 @@
 
         // Check if slider has active content attribute set to true
         isActiveContent: function() {
-            return typeof this.slider.data('activecontent') !== 'undefined';
+            return this.slider.data('active-content') !== undefined;
         }
 
     });
