@@ -5,7 +5,7 @@
   "authors": [
     "libeo <info@libeo.com>"
   ],
-  "description": "A responsive/a11y friendly slider.",
+  "description": "Accessible, responsive and configurable jQuery slider plugin",
   "main": "dist/jquery.slider.js",
   "private": true,
   "ignore": [
@@ -13,8 +13,7 @@
   ],
   "dependencies": {
     "jquery": "^2.2.2",
-    "jquery-touchswipe": "~1.6.15",
-    "vtt-jquery-focusable": "https://github.com/libeo-vtt/jquery-focusable.git#~1.0.0"
+    "jquery-touchswipe": "~1.6.15"
   },
-  "keywords": "slider, jquery, plugin"
+  "keywords": "slider, accessible, jquery, plugin"
 }

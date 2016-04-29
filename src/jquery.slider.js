@@ -9,8 +9,6 @@
         this.defaults = {
             displayedSlides: 4,
             slidesGutter: 20,
-            createNavigation: true,
-            navigationType: 'both',
             createNavigationArrows: true,
             createNavigationPages: true,
             displayPageNumber: true,
@@ -92,6 +90,21 @@
             if (this.config.swipe) this.swipe();
         }
 
+        this.publicMethods = {
+            prevSlide: $.proxy(function() {
+                this.changeSlide(this.activeSlideIndex - 1);
+            }, this),
+            nextSlide: $.proxy(function() {
+                this.changeSlide(this.activeSlideIndex + 1);
+            }, this),
+            startAutoplay: $.proxy(function() {
+                this.autoplay();
+            }, this),
+            stopAutoplay: $.proxy(function() {
+                this.stopAutoplay();
+            }, this)
+        }
+
         this.init();
     };
 
@@ -146,7 +159,7 @@
             });
 
             // Disable focus on hidden slides
-            this.slides.slice(this.config.displayedSlides).find(':focusable').attr('tabindex', '-1');
+            this.slides.slice(this.config.displayedSlides).find('a, button, :input, [tabindex]').attr('tabindex', '-1');
 
             // Callback
             this.config.onLayoutUpdateAfter();
@@ -221,7 +234,7 @@
             this.navigationPrevious = this.sliderNavigation.find('.' + this.classes.navigationPrev);
             this.navigationNext = this.sliderNavigation.find('.' + this.classes.navigationNext);
 
-            if (this.config.navigationType === 'both') {
+            if (this.config.createNavigationArrows || this.config.createNavigationPages) {
                 this.navigationPrevious.attr('aria-hidden', 'true');
                 this.navigationNext.attr('aria-hidden', 'true');
             }
@@ -306,10 +319,11 @@
         // Initialize autoplay
         autoplay: function() {
             this.isAutoplay = true;
-            this.autoplayButton.addClass(this.classes.states.active);
 
             this.createAutoplayButton();
             this.toggleAutoplayText();
+
+            if (this.autoplayInterval) clearInterval(this.autoplayInterval);
 
             this.autoplayInterval = setInterval($.proxy(function() {
                 if (!this.mouseHover) this.changeSlide(this.activeSlideIndex + 1);
@@ -405,9 +419,11 @@
 
         // Change active slide animation
         changeSlideAnimation: function(index) {
+            var direction = (this.activeSlideIndex < index ? 'next' : 'prev');
+            var focusableElements = 'a, button, :input, [tabindex]';
             this.isAnimated = true;
 
-            this.config.onChangeSlideBefore();
+            this.config.onChangeSlideBefore(direction);
 
             // Change slide animation
             this.sliderContainer.animate({
@@ -418,14 +434,14 @@
                 // Update active slide index
                 this.activeSlideIndex = index;
 
-                this.slides.find(':focusable').attr('tabindex', '-1');
-                this.slides.slice(index, index + this.config.displayedSlides).find(':focusable').removeAttr('tabindex');
+                this.slides.find(focusableElements).attr('tabindex', '-1');
+                this.slides.slice(index, index + this.config.displayedSlides).find(focusableElements).removeAttr('tabindex');
 
                 if (this.config.createNavigationArrows || this.config.createNavigationPages) {
                     this.updateSlidesNavigation();
                 }
 
-                this.config.onChangeSlideAfter();
+                this.config.onChangeSlideAfter(direction);
             }, this));
         },
 
@@ -502,17 +518,24 @@
     });
 
     $.fn.slider = function(options) {
-        return this.each(function() {
-            var element = $(this);
+        this.each($.proxy(function(index, element) {
+            var $element = $(element);
 
-            // Return early if this element already has a plugin instance
-            if (element.data('slider')) return;
+            // Return early if this $element already has a plugin instance
+            if ($element.data('slider')) return;
 
-            // pass options to plugin constructor
-            var slider = new Slider(this, options);
+            // Pass options to plugin constructor
+            var slider = new Slider(element, options);
 
-            // Store plugin object in this element's data
-            element.data('slider', slider);
-        });
+            // Add every public methods to plugin
+            for (var key in slider.publicMethods) {
+                this[key] = slider.publicMethods[key];
+            }
+
+            // Store plugin object in this $element's data
+            $element.data('slider', slider);
+        }, this));
+
+        return this;
     };
 })(jQuery);
