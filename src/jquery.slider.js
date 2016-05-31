@@ -408,7 +408,12 @@
             if (this.autoplayInterval) clearInterval(this.autoplayInterval);
 
             this.autoplayInterval = setInterval($.proxy(function() {
-                if (!this.mouseHover) this.changeSlide(this.activeSlideIndex + 1);
+                if (!this.mouseHover) {
+                    this.changeSlide(this.activeSlideIndex + 1);
+                    if (this.isActiveContent) {
+                        this.slides.eq(this.activeSlideIndex + 1).find('.' + this.classes.sliderActiveContentTrigger).click();
+                    }
+                }
             }, this), this.config.autoplayDelay);
         },
 
