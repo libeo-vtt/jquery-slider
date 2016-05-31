@@ -542,12 +542,14 @@
                 currentPageIndexRounded = this.pagesNavigation.length - 1;
             }
 
-            // Update pages buttons active class
-            this.pagesNavigation.removeClass(this.classes.states.active).eq(currentPageIndexRounded).addClass(this.classes.states.active);
+            if (this.config.createPagesNavigation) {
+                // Update pages buttons active class
+                this.pagesNavigation.removeClass(this.classes.states.active).eq(currentPageIndexRounded).addClass(this.classes.states.active);
 
-            // Update hidden active text
-            this.pagesNavigation.find('.' + this.classes.ariaTextActive).remove();
-            this.pagesNavigation.eq(currentPageIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.pagesNavigationActive + '</span>');
+                // Update hidden active text
+                this.pagesNavigation.find('.' + this.classes.ariaTextActive).remove();
+                this.pagesNavigation.eq(currentPageIndexRounded).append('<span class="visuallyhidden ' + this.classes.ariaTextActive + '">' + this.labels.pagesNavigationActive + '</span>');
+            }
         },
 
         detectswipe: function(element, callback) {
