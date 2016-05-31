@@ -12,8 +12,7 @@
     "node_modules"
   ],
   "dependencies": {
-    "jquery": "^2.2.2",
-    "jquery-touchswipe": "~1.6.15"
+    "jquery": "^2.2.2"
   },
   "keywords": "slider, accessible, jquery, plugin"
 }

@@ -53,7 +53,7 @@ Margin between slides
 
 ---
 
-#### `createNavigationArrows`
+#### `createArrowsNavigation`
 
 > **Type:** Boolean<br>
 **Default value:** true
@@ -62,12 +62,21 @@ Create a previous/next navigation
 
 ---
 
-#### `createNavigationPages`
+#### `createPagesNavigation`
 
 > **Type:** Boolean<br>
 **Default value:** true
 
 Create a paginated navigation
+
+---
+
+#### `createActiveContentNavigation`
+
+> **Type:** Boolean<br>
+**Default value:** true
+
+Create a previous/next navigation for active content
 
 ---
 
