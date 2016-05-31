@@ -200,8 +200,12 @@
 
             this.activeContentTriggers.on('click', $.proxy(function(e) {
                 var $element = $(e.currentTarget);
-                var content = $element.parents('.' + this.classes.slide).find('.' + $element.data('show-active-content')).clone();
-                var index = $element.parents('.' + this.classes.slide).index();
+                var $slide = $element.parents('.' + this.classes.slide);
+                var content = $slide.find('.' + $element.data('show-active-content')).clone();
+                var index = $slide.index();
+
+                this.slides.removeClass(this.classes.states.active);
+                $slide.addClass(this.classes.states.active);
 
                 this.updateActiveSlideContent(content, index);
                 e.preventDefault();
@@ -360,10 +364,15 @@
                 var currentPageIndex = Math.floor(currentIndex / this.config.displayedSlides);
 
                 this.navigationTypeTriggered = 'pages';
-                this.slides.eq(currentIndex).find('.' + this.classes.sliderActiveContentTrigger).click();
                 this.changeSlide(currentPageIndex * this.config.displayedSlides);
                 this.updateAriabox(this.config.navigationPrevAria);
                 this.stopAutoplay();
+
+                this.slides
+                    .removeClass(this.classes.states.active)
+                    .eq(currentIndex)
+                    .addClass(this.classes.states.active)
+                    .find('.' + this.classes.sliderActiveContentTrigger).click();
 
                 this.activeContentWrapper.attr('data-index', currentIndex);
             }, this));
@@ -382,10 +391,15 @@
                 var currentPageIndex = Math.floor(currentIndex / this.config.displayedSlides);
 
                 this.navigationTypeTriggered = 'pages';
-                this.slides.eq(currentIndex).find('.' + this.classes.sliderActiveContentTrigger).click();
                 this.changeSlide(currentPageIndex * this.config.displayedSlides);
                 this.updateAriabox(this.config.navigationNextAria);
                 this.stopAutoplay();
+
+                this.slides
+                    .removeClass(this.classes.states.active)
+                    .eq(currentIndex)
+                    .addClass(this.classes.states.active)
+                    .find('.' + this.classes.sliderActiveContentTrigger).click();
 
                 this.activeContentWrapper.attr('data-index', currentIndex);
             }, this));
