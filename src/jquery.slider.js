@@ -548,15 +548,14 @@
 
         // Update navigation active elements
         updateSlidesNavigation: function() {
-            // Get current active page index
-            var currentPageIndex = this.activeSlideIndex / this.config.displayedSlides;
-            var currentPageIndexRounded = Math.floor(currentPageIndex);
-
-            if (currentPageIndex === this.slides.length / this.config.displayedSlides - 1) {
-                currentPageIndexRounded = this.pagesNavigation.length - 1;
-            }
-
             if (this.config.createPagesNavigation) {
+                // Get current active page index
+                var currentPageIndex = this.activeSlideIndex / this.config.displayedSlides;
+                var currentPageIndexRounded = Math.floor(currentPageIndex);
+
+                if (currentPageIndex === this.slides.length / this.config.displayedSlides - 1) {
+                    currentPageIndexRounded = this.pagesNavigation.length - 1;
+                }
                 // Update pages buttons active class
                 this.pagesNavigation.removeClass(this.classes.states.active).eq(currentPageIndexRounded).addClass(this.classes.states.active);
 
