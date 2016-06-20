@@ -169,6 +169,9 @@
                 'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
             });
 
+            // Add active class on first slide
+            $(this.slides[0]).addClass(this.config.classes.states.active);
+
             // Disable focus on hidden slides
             this.slides.slice(this.config.displayedSlides).find('a, button, :input, [tabindex]').attr('tabindex', '-1');
 
@@ -511,6 +514,9 @@
                     }
                 }
             }
+
+            this.slides.removeClass(this.classes.states.active);
+            $(this.slides[index]).addClass(this.classes.states.active);
 
             // Only animated if there is no active animation
             if (!this.isAnimated) {
