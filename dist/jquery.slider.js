@@ -530,7 +530,7 @@
             var focusableElements = 'a, button, :input, [tabindex]';
             this.isAnimated = true;
 
-            this.config.onChangeSlideBefore(direction);
+            this.config.onChangeSlideBefore(direction, $(this.slides[index]));
 
             // Change slide animation
             this.sliderContainer.animate({
@@ -548,7 +548,7 @@
                     this.updateSlidesNavigation();
                 }
 
-                this.config.onChangeSlideAfter(direction);
+                this.config.onChangeSlideAfter(direction, $(this.slides[this.activeSlideIndex]));
             }, this));
         },
 
