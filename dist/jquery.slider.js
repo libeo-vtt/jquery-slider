@@ -7,6 +7,7 @@
 
         // Default module configuration
         this.defaults = {
+            noCss: false,
             displayedSlides: 4,
             slidesGutter: 20,
             createArrowsNavigation: true,
@@ -148,26 +149,28 @@
             this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
             // Add necessary css for the slider
-            this.sliderWrapper.css({
-                'position': 'relative',
-                'overflow': 'hidden',
-                'margin-left': this.config.slidesGutter / 2 * -1 + 'px',
-                'margin-right': this.config.slidesGutter / 2 * -1 + 'px'
-            });
+            if (this.config.noCss === false) {
+                this.sliderWrapper.css({
+                    'position': 'relative',
+                    'overflow': 'hidden',
+                    'margin-left': this.config.slidesGutter / 2 * -1 + 'px',
+                    'margin-right': this.config.slidesGutter / 2 * -1 + 'px'
+                });
 
-            this.sliderContainer.css({
-                'position': 'relative',
-                'left': '0',
-                'width': this.slides.length / this.config.displayedSlides * 100 + '%'
-            });
+                this.sliderContainer.css({
+                    'position': 'relative',
+                    'left': '0',
+                    'width': this.slides.length / this.config.displayedSlides * 100 + '%'
+                });
 
-            this.slides.css({
-                'float': 'left',
-                'position': 'relative',
-                'margin-left': this.config.slidesGutter / 2 + 'px',
-                'margin-right': this.config.slidesGutter / 2 + 'px',
-                'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
-            });
+                this.slides.css({
+                    'float': 'left',
+                    'position': 'relative',
+                    'margin-left': this.config.slidesGutter / 2 + 'px',
+                    'margin-right': this.config.slidesGutter / 2 + 'px',
+                    'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
+                });
+            }
 
             // Add active class on first slide
             $(this.slides[0]).addClass(this.config.classes.states.active);
