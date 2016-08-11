@@ -138,8 +138,7 @@
 
         // Layout initialization
         initLayout: function() {
-            var slideWidth = 100 / this.slides.length,
-                slideWidthCalc = this.config.slidesGutter / this.slides.length * this.slides.length;
+            var slideWidth = 100 / this.slides.length;
 
             // Callback
             this.config.onLayoutUpdateBefore();
@@ -149,6 +148,15 @@
             this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
             // Add necessary css for the slider
+            this.sliderContainer.css({
+                'position': 'relative',
+                'left': '0',
+                'width': this.slides.length / this.config.displayedSlides * 100 + '%'
+            });
+
+            this.slides.css('width', slideWidth + '%');
+
+            // Add optional css for the slider
             if (this.config.noCss === false) {
                 this.sliderWrapper.css({
                     'position': 'relative',
@@ -157,18 +165,11 @@
                     'margin-right': this.config.slidesGutter / 2 * -1 + 'px'
                 });
 
-                this.sliderContainer.css({
-                    'position': 'relative',
-                    'left': '0',
-                    'width': this.slides.length / this.config.displayedSlides * 100 + '%'
-                });
-
                 this.slides.css({
                     'float': 'left',
                     'position': 'relative',
                     'margin-left': this.config.slidesGutter / 2 + 'px',
-                    'margin-right': this.config.slidesGutter / 2 + 'px',
-                    'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
+                    'margin-right': this.config.slidesGutter / 2 + 'px'
                 });
             }
 
