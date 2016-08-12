@@ -161,17 +161,7 @@
             this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
             // Add necessary css for the slider
-            this.sliderContainer.css({
-                'position': 'relative',
-                'display': 'flex',
-                'left': '0',
-                'width': this.slides.length / this.config.displayedSlides * 100 + '%'
-            });
-
-            this.slides.css('width', slideWidth + '%');
-
-            // Add optional css for the slider
-            if (this.config.noCss === false) {
+            if (!this.config.noCss) {
                 this.sliderWrapper.css({
                     'position': 'relative',
                     'overflow': 'hidden',
@@ -179,10 +169,20 @@
                     'margin-right': this.config.slidesGutter / 2 * -1 + 'px'
                 });
 
+                this.sliderContainer.css({
+                    'position': 'relative',
+                    'left': '0',
+                    'font-size': '0',
+                    'width': this.slides.length / this.config.displayedSlides * 100 + '%'
+                });
+
                 this.slides.css({
                     'position': 'relative',
+                    'display': 'inline-block',
+                    'width': 'calc(' + slideWidth + '% - ' + this.config.slidesGutter + 'px)',
                     'margin-left': this.config.slidesGutter / 2 + 'px',
-                    'margin-right': this.config.slidesGutter / 2 + 'px'
+                    'margin-right': this.config.slidesGutter / 2 + 'px',
+                    'font-size': '1rem'
                 });
             }
 
