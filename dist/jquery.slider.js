@@ -168,6 +168,8 @@
                 'width': this.slides.length / this.config.displayedSlides * 100 + '%'
             });
 
+            this.slides.css('width', slideWidth + '%');
+
             // Add optional css for the slider
             if (this.config.noCss === false) {
                 this.sliderWrapper.css({
@@ -179,7 +181,6 @@
 
                 this.slides.css({
                     'position': 'relative',
-                    'width': slideWidth + '%',
                     'margin-left': this.config.slidesGutter / 2 + 'px',
                     'margin-right': this.config.slidesGutter / 2 + 'px'
                 });
