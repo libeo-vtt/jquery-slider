@@ -21,6 +21,7 @@
             autoplayDelay: 3000,
             infiniteLoop: true,
             animationSpeed: 300,
+            changeSlideUrlParameter: 'changeSlide',
             onActiveSlideUpdateBefore: $.noop,
             onActiveSlideUpdateAfter: $.noop,
             onChangeSlideBefore: $.noop,
@@ -91,6 +92,9 @@
         // Initialize animated state
         this.isAnimated = false;
 
+        // Get url parameter
+        this.urlParameter = this.getUrlParameter(this.config.changeSlideUrlParameter);
+
         this.publicMethods = {
             prevSlide: $.proxy(function() {
                 this.changeSlide(this.activeSlideIndex - 1);
@@ -133,14 +137,22 @@
                 }
             }
 
+            if (this.urlParameter) {
+                var animationSpeed = this.animationSpeed;
+                this.animationSpeed = 0;
+
+                this.changeSlide(this.urlParameter);
+
+                this.animationSpeed = animationSpeed;
+            }
+
             // Bind events
             this.bindEvents();
         },
 
         // Layout initialization
         initLayout: function() {
-            var slideWidth = 100 / this.slides.length,
-                slideWidthCalc = this.config.slidesGutter / this.slides.length * this.slides.length;
+            var slideWidth = 100 / this.slides.length;
 
             // Callback
             this.config.onLayoutUpdateBefore();
@@ -150,7 +162,7 @@
             this.slider.find('.' + this.classes.sliderOverflow).css('overflow', 'hidden');
 
             // Add necessary css for the slider
-            if (this.config.noCss === false) {
+            if (!this.config.noCss) {
                 this.sliderWrapper.css({
                     'position': 'relative',
                     'overflow': 'hidden',
@@ -161,15 +173,17 @@
                 this.sliderContainer.css({
                     'position': 'relative',
                     'left': '0',
+                    'font-size': '0',
                     'width': this.slides.length / this.config.displayedSlides * 100 + '%'
                 });
 
                 this.slides.css({
-                    'float': 'left',
                     'position': 'relative',
+                    'display': 'inline-block',
+                    'width': 'calc(' + slideWidth + '% - ' + this.config.slidesGutter + 'px)',
                     'margin-left': this.config.slidesGutter / 2 + 'px',
                     'margin-right': this.config.slidesGutter / 2 + 'px',
-                    'width': 'calc(' + slideWidth + '% - ' + slideWidthCalc + 'px)'
+                    'font-size': '1rem'
                 });
             }
 
@@ -633,6 +647,21 @@
         // Check if slider has active content attribute set to true
         isActiveContent: function() {
             return this.slider.data('active-content') !== undefined;
+        },
+
+        getUrlParameter: function(sParam) {
+            var sPageURL = decodeURIComponent(window.location.search.substring(1));
+            var sURLVariables = sPageURL.split('&');
+            var sParameterName;
+            var i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : sParameterName[1];
+                }
+            }
         }
 
     });
