@@ -14,11 +14,17 @@
         <div class="slider-wrapper">
             <div class="slider-container clearfix">
                 <div class="slide">
-                    <p class="element-to-show">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Pariatur enim minus totam nemo, ullam esse corporis necessitatibus laboriosam iste consectetur, asperiores autem expedita officia at numquam beatae exercitationem vero voluptates quidem hic! Magni dignissimos velit repellendus magnam optio provident consectetur doloremque corrupti odit, atque sunt mollitia eaque veniam, dolor perferendis?</p>
+                    <p class="element-to-show">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                        <img src="http://i.imgur.com/wZqNIiW.jpg" data-src="http://i.imgur.com/JGTQlio.jpg" style="max-width:300px;">
+                    </p>
                     <button class="slider-active-content-trigger" data-show-active-content="element-to-show">Activate this content</button>
                 </div>
                 <div class="slide">
-                    <p class="element-to-show">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis, minima. Neque et praesentium minus molestiae atque sunt veritatis ab facere consequatur dolorum sequi minima, nam distinctio, accusamus quo, repellat maxime. Magni accusantium placeat iusto soluta, deleniti odio magnam repudiandae tenetur iste modi, provident. Cum similique consequatur tempora nam vitae, soluta.</p>
+                    <p class="element-to-show">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officiis, minima. Neque et praesentium minus molestiae atque sunt veritatis ab facere consequatur dolorum sequi minima, nam distinctio, accusamus quo, repellat maxime. Magni accusantium placeat iusto soluta, deleniti odio magnam repudiandae tenetur iste modi, provident. Cum similique consequatur tempora nam vitae, soluta.
+                        <img src="http://i.imgur.com/wZqNIiW.jpg" data-src="http://i.imgur.com/JGTQlio.jpg" style="max-width:300px;">
+                    </p>
                     <button class="slider-active-content-trigger" data-show-active-content="element-to-show">Activate this content</button>
                 </div>
                 <div class="slide">
@@ -59,7 +65,9 @@
     <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="../dist/jquery.slider.js"></script>
     <script>
-    $('.slider').slider();
+    $('.slider').slider({
+        activeContentThumbnail: true
+    });
     </script>
 </body>
 

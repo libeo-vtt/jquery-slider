@@ -96,6 +96,16 @@ Display pages number in navigation
 
 ---
 
+#### `activeContentThumbnail`
+
+> **Type:** Boolean<br>
+**Default value:** false
+
+Change src (thumbnail) of img for the data-src (full size image) while displaying active content
+Only works if active content is set and if there's only one image per slide.
+
+---
+
 #### `swipe`
 
 > **Type:** Boolean<br>

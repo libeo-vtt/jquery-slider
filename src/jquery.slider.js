@@ -15,6 +15,7 @@
             createActiveContentNavigation: true,
             displayPageNumber: true,
             displayFirstActiveContent: true,
+            activeContentThumbnail: false,
             swipe: true,
             autoplay: false,
             autoplayDelay: 3000,
@@ -226,6 +227,14 @@
         updateActiveSlideContent: function(content, index) {
             this.config.onActiveSlideUpdateBefore();
             this.activeContentContainer.html(content);
+            // Change src if thumbnail is different from full image
+            if (this.config.activeContentThumbnail == true) {
+                var $img = this.activeContentContainer.find('img');
+                var dataSrc = $img.data('src');
+                if (dataSrc != '') {
+                    $img.attr('src', dataSrc);
+                }
+            }
             this.activeContentWrapper.attr('data-index', index);
             this.config.onActiveSlideUpdateAfter();
         },
