@@ -117,6 +117,9 @@
 
         // Component initialization
         init: function() {
+            // Check for aria and labels on the HTML element - overwrite JS config
+            this.updatePluginText();
+
             this.initLayout(this.config.displayedSlides);
             this.createAriabox();
 
@@ -148,6 +151,22 @@
 
             // Bind events
             this.bindEvents();
+        },
+
+        updatePluginText: function() {
+            // Loop through labels in config
+            $.each(this.config.labels, $.proxy(function(labelKey, labelText) {
+                // Loop through labels in element data attributes to see if it's set
+                $.each(this.slider.data(), $.proxy(function(dataLabelKey, dataLabelText) {
+                    var dataLabelKeyCamelCased = dataLabelKey.replace(/-([a-z])/g, function(g) {
+                        return g[1].toUpperCase();
+                    });
+                    // We have a match!
+                    if (dataLabelKeyCamelCased === labelKey) {
+                        this.config.labels[dataLabelKeyCamelCased] = dataLabelText;
+                    }
+                }, this));
+            }, this));
         },
 
         // Layout initialization
