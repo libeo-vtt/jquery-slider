@@ -316,7 +316,7 @@
                 this.navigationTypeTriggered = 'arrows';
 
                 this.changeSlide(this.activeSlideIndex - 1);
-                this.updateAriabox(this.config.navigationPrevAria);
+                this.updateAriabox(this.config.labels.navigationPrevAria);
                 this.stopAutoplay();
             }, this));
 
@@ -324,7 +324,7 @@
                 this.navigationTypeTriggered = 'arrows';
 
                 this.changeSlide(this.activeSlideIndex + 1);
-                this.updateAriabox(this.config.navigationNextAria);
+                this.updateAriabox(this.config.labels.navigationNextAria);
                 this.stopAutoplay();
             }, this));
         },
@@ -413,7 +413,7 @@
 
                 this.navigationTypeTriggered = 'pages';
                 this.changeSlide(currentPageIndex * this.config.displayedSlides);
-                this.updateAriabox(this.config.navigationPrevAria);
+                this.updateAriabox(this.config.labels.navigationPrevAria);
                 this.stopAutoplay();
 
                 this.slides
@@ -440,7 +440,7 @@
 
                 this.navigationTypeTriggered = 'pages';
                 this.changeSlide(currentPageIndex * this.config.displayedSlides);
-                this.updateAriabox(this.config.navigationNextAria);
+                this.updateAriabox(this.config.labels.navigationNextAria);
                 this.stopAutoplay();
 
                 this.slides
