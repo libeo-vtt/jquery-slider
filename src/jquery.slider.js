@@ -21,6 +21,7 @@
             autoplayDelay: 3000,
             infiniteLoop: true,
             animationSpeed: 300,
+            addActiveClass: true,
             changeSlideUrlParameter: 'changeSlide',
             onActiveSlideUpdateBefore: $.noop,
             onActiveSlideUpdateAfter: $.noop,
@@ -207,7 +208,9 @@
             }
 
             // Add active class on first slide
-            $(this.slides[0]).addClass(this.config.classes.states.active);
+            if (this.config.addActiveClass) {
+                $(this.slides[0]).addClass(this.config.classes.states.active);
+            }
 
             // Disable focus on hidden slides
             this.slides.slice(this.config.displayedSlides).find('a, button, :input, [tabindex]').attr('tabindex', '-1');
@@ -244,8 +247,10 @@
                 var content = $slide.find('.' + $element.data('show-active-content')).clone();
                 var index = $slide.index();
 
-                this.slides.removeClass(this.classes.states.active);
-                $slide.addClass(this.classes.states.active);
+                if (this.config.addActiveClass) {
+                    this.slides.removeClass(this.classes.states.active);
+                    $slide.addClass(this.classes.states.active);
+                }
 
                 this.updateActiveSlideContent(content, index);
                 e.preventDefault();
@@ -560,8 +565,11 @@
                 }
             }
 
-            this.slides.removeClass(this.classes.states.active);
-            $(this.slides[index]).addClass(this.classes.states.active);
+            // Add class on active slide if config is set to true
+            if (this.config.addActiveClass) {
+                this.slides.removeClass(this.classes.states.active);
+                $(this.slides[index]).addClass(this.classes.states.active);
+            }
 
             // Only animated if there is no active animation
             if (!this.isAnimated) {
